@@ -33,7 +33,7 @@ void writeFile(){
 
         if(new_modNames[x] != modNames[x]){
             fseek(fp, FLAGS_WEAPON[version] + (8 * x),SEEK_SET);
-            fwrite(&new_modNames[x], sizeof(long int), 1, fp);
+            fwrite(&new_modNames[x], sizeof(int), 1, fp);
         }    
     }
 
@@ -44,7 +44,7 @@ void writeFile(){
         }
         if(new_modNames[x + numberOfWeapons] != modNames[x + numberOfWeapons]){
             fseek(fp, FLAGS_BOW[version] + (8 * x),SEEK_SET);
-            fwrite(&new_modNames[x + numberOfWeapons], sizeof(long int), 1, fp);
+            fwrite(&new_modNames[x + numberOfWeapons], sizeof(int), 1, fp);
         }    
     }
 
