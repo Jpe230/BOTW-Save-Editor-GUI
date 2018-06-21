@@ -16,7 +16,7 @@ A Work in Progress Save Editor, currently it only to modifies rupees, durability
 <img style="float: right;" src="screenshots/ss (2).jpg">
 <img style="float: right;" src="screenshots/ss (4).jpg"> 
 <img style="float: right;" src="screenshots/ss (5).jpg"> 
-- When a keyboard shows up, press A to select an input, B to close the Keyboard.
+-Press Y to open the Rupees Keyboard (press A to select an input, B or Y to close the Keyboard)
 <img style="float: right;" src="screenshots/ss (3).jpg"> 
 - Press + to exit the program.
 <img style="float: right;" src="screenshots/ss (6).jpg"> 
