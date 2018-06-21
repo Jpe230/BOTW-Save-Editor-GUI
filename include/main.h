@@ -1,0 +1,47 @@
+#ifndef _main_h_
+#define _main_h_
+
+#include <switch.h>
+#include "MainMenu.h"
+#include "botw_backend.h"
+
+int buttons;
+int currentPage;
+int maxPage;
+int currentState;
+int slot;
+int keyboard;
+int keyboardy;
+int itemBox;
+int isopen;
+int drop;
+char str[7];
+int positionKey;
+int key;
+int number;
+int currentItem;
+
+int main(int argc, char **argv);
+void startSDLServices();
+void initServices();
+void buttonLogic(int x);
+void closeServices();
+void MenuButtons(int x);
+void MenuButtonsSlot(int x);
+void ConfirmButton();
+void setPages();
+void returnMainScreen();
+void KeyboardButtons(int x);
+void BackButton();
+void ItemMenu(int x);
+void RupeeKey();
+void comboBox(int x);
+void dropMenuButtons(int x);
+void KeyboardLogic();
+void exitMen();
+
+
+
+
+
+#endif
