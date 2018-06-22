@@ -515,6 +515,9 @@ int main(int argc, char **argv){
             selectSlotMenu(slot);
         }
 
+        if(currentState <= 0){
+            if (kDown & KEY_PLUS) break;
+        }
         if(currentState != 0){
             if (kDown & KEY_B) BackButton();
             if (kDown & KEY_Y) RupeeKey();
@@ -527,6 +530,8 @@ int main(int argc, char **argv){
                 break;
             }
         }
+
+        
         
     }
 
