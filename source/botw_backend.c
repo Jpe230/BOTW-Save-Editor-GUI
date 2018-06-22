@@ -170,9 +170,7 @@ int setFile(int intSlot){
 	numberOfItems = 0; 
 	rupeeValue = 0;
 	rupees = 0;
-
-    mountSaveData();
-
+    
     char file_name[75];
     char header[] = "save:/";
     char footer[] = "/game_data.sav";

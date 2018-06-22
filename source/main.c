@@ -31,6 +31,29 @@ void startSDLServices(){
     SDL_LoadImage(renderer, &bbuttonp, "romfs:/bbutton_p.png");
     SDL_LoadImage(renderer, &okbuttonp,"romfs:/okbutton_p.png" );
     SDL_LoadImage(renderer, &check,"romfs:/check.png" );
+
+    for(int x = 0; x < 6; x++){
+        char nameFile_S[22];
+        snprintf(nameFile_S, sizeof nameFile_S, "save:/%d/caption.jpg", x);
+        
+        if(file_exist (nameFile_S)){
+            SDL_LoadImage(renderer, &saveFileImg[x], nameFile_S);
+        }
+        else{
+            SDL_LoadImage(renderer, &saveFileImg[x], "romfs:/missingSlot.png");
+        }
+    }
+}
+
+int file_exist (char *filename)
+{   
+    FILE *file = fopen(filename, "r");
+   if (file != NULL)
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
 }
 
 void initServices(){
@@ -40,7 +63,15 @@ void initServices(){
     currentState = 0;
     currentItem = 0;
     romfsInit();
-    startSDLServices();    
+    if(mountSaveData() == 0){
+        currentState = -1;
+         errorScreen();
+    }
+    else{
+        startSDLServices();
+    }
+    
+    
 }
 
 void setPages(){
@@ -449,7 +480,9 @@ void MenuButtons(int x){
 
 int main(int argc, char **argv){
 
+    appletSetScreenShotPermission(1);
     initServices();
+
 
     selectSlotMenu(slot);
 
@@ -504,23 +537,6 @@ void RupeeKey(){
         KeyboardScreen();
         isopen = 1;
     }
-}
-
-void returnMainScreen(){
-
-    buttons = 0;
-    slot = 0;
-    currentPage = 1;
-    currentState = 0;
-    isopen = 0;
-    
-    fclose(fp);
-    unmountSaveData();
-    fsdevUnmountDevice("save");
-    selectSlotMenu(slot);
-
-    
-
 }
 
 void closeServices(){

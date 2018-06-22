@@ -11,7 +11,7 @@ void unmountSaveData(){
     fsdevUnmountDevice("save");
 }
 
-void mountSaveData()
+int mountSaveData()
 {
     int ret=0;
     Result rc = 0;
@@ -27,6 +27,7 @@ void mountSaveData()
     
     if (R_FAILED(rc)) {
         printf("accountInitialize() failed: 0x%x\n", rc);
+        return 0;
     }
 
     if (R_SUCCEEDED(rc)) {
@@ -35,10 +36,12 @@ void mountSaveData()
 
      if (R_FAILED(rc)) {
             printf("accountGetActiveUser() failed: 0x%x\n", rc);
+            return 0;
         }
      else if(!account_selected) {
             printf("No user is currently selected.\n");
             rc = -1;
+            return 0;
         }
     }
 
@@ -50,7 +53,9 @@ void mountSaveData()
         rc = fsMount_SaveData(&tmpfs, titleID, userID);
         if (R_FAILED(rc)) {
             printf("fsMount_SaveData() failed: 0x%x\n", rc);
+            return 0;
         }
+
     }
 
     if (R_SUCCEEDED(rc)) {
@@ -58,8 +63,11 @@ void mountSaveData()
         if (ret==-1) {
             printf("fsdevMountDevice() failed.\n");
             rc = ret;
+            return 0;
         }
     }
+
+    return 1;
 
 }
 

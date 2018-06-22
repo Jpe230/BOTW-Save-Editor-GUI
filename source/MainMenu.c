@@ -10,12 +10,15 @@ void selectSlotMenu(int slotchar){
 	SDL_DrawRect(renderer,30,648,1220,2, WHITE_COLOR);
 	SDL_DrawText(Arial, 110, 27, WHITE_TEXT_COLOR, "Breath of the Wild Editor");
 
-	SDL_DrawRect(renderer,380,248,517,167, LEFTBAR_COLOR);
-	SDL_DrawText(Arial_S,554,300, WHITE_TEXT_COLOR, "Select File Slot:");
+	SDL_DrawRect(renderer,380,148,517,400, LEFTBAR_COLOR);
+	SDL_DrawText(Arial_S,554,200, WHITE_TEXT_COLOR, "Select File Slot:");
 	
 	char slotc[2];
 	snprintf(slotc, sizeof slotc, "%d", slotchar);
-	SDL_DrawText(Arial_S, 632, 330, WHITE_TEXT_COLOR, slotc);
+	SDL_DrawText(Arial_S, 632, 230, WHITE_TEXT_COLOR, slotc);
+
+	SDL_DrawImage(renderer, saveFileImg[slotchar],512, 300, 256, 144);
+
 	SDL_RenderPresent(renderer);
 }
 
