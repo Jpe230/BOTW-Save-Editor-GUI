@@ -40,7 +40,7 @@ ROMFS	:=	romfs
 
 APP_TITLE	:=	BOTW UI
 APP_AUTHOR	:=	Jpe230
-APP_VERSION	:=	0.2
+APP_VERSION	:=	0.3
 ICON        :=  meta/icon.jpg
 
 #---------------------------------------------------------------------------------

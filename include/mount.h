@@ -3,7 +3,7 @@
 
 
 void unmountSaveData();
-void mountSaveData();
+int mountSaveData();
 
 
 #endif // TRANSLATIONS_H_

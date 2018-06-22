@@ -2,8 +2,11 @@
 #define _main_h_
 
 #include <switch.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "MainMenu.h"
 #include "botw_backend.h"
+#include "mount.h"
 
 int buttons;
 int currentPage;
@@ -30,7 +33,6 @@ void MenuButtons(int x);
 void MenuButtonsSlot(int x);
 void ConfirmButton();
 void setPages();
-void returnMainScreen();
 void KeyboardButtons(int x);
 void BackButton();
 void ItemMenu(int x);
@@ -39,6 +41,7 @@ void comboBox(int x);
 void dropMenuButtons(int x);
 void KeyboardLogic();
 void exitMen();
+int file_exist (char *filename);
 
 
 

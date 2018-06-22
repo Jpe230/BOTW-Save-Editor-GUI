@@ -12,6 +12,7 @@ SDL_Surface* screenSurface;
 SDL_Renderer* renderer;
 TTF_Font *Arial, *Arial_S, *Arial_M;
 SDL_Texture *sprites[200];
+SDL_Texture *saveFileImg[6];
 SDL_Texture *GreenRupee;
 SDL_Texture *back;
 SDL_Texture *bbutton;
