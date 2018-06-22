@@ -32,17 +32,26 @@ void startSDLServices(){
     SDL_LoadImage(renderer, &okbuttonp,"romfs:/okbutton_p.png" );
     SDL_LoadImage(renderer, &check,"romfs:/check.png" );
 
-    for(int x = 0; x < 6; x++){
-        char nameFile_S[22];
-        snprintf(nameFile_S, sizeof nameFile_S, "save:/%d/caption.jpg", x);
-        
-        if(file_exist (nameFile_S)){
-            SDL_LoadImage(renderer, &saveFileImg[x], nameFile_S);
-        }
-        else{
-            SDL_LoadImage(renderer, &saveFileImg[x], "romfs:/missingSlot.png");
-        }
+    if(mountSaveData() == 0){
+        currentState = -1;
+         errorScreen();
     }
+    else{
+        for(int x = 0; x < 6; x++){
+            char nameFile_S[22];
+            snprintf(nameFile_S, sizeof nameFile_S, "save:/%d/caption.jpg", x);
+            
+            if(file_exist (nameFile_S)){
+                SDL_LoadImage(renderer, &saveFileImg[x], nameFile_S);
+            }
+            else{
+                SDL_LoadImage(renderer, &saveFileImg[x], "romfs:/missingSlot.png");
+            }
+        }
+
+        selectSlotMenu(slot);
+    }
+    
 }
 
 int file_exist (char *filename)
@@ -63,14 +72,7 @@ void initServices(){
     currentState = 0;
     currentItem = 0;
     romfsInit();
-    if(mountSaveData() == 0){
-        currentState = -1;
-         errorScreen();
-    }
-    else{
-        startSDLServices();
-    }
-    
+    startSDLServices();
     
 }
 
@@ -482,9 +484,6 @@ int main(int argc, char **argv){
 
     appletSetScreenShotPermission(1);
     initServices();
-
-
-    selectSlotMenu(slot);
 
     while(appletMainLoop())
     {
