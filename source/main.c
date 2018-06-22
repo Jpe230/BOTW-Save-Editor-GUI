@@ -37,21 +37,25 @@ void startSDLServices(){
          errorScreen();
     }
     else{
-        for(int x = 0; x < 6; x++){
-            char nameFile_S[22];
-            snprintf(nameFile_S, sizeof nameFile_S, "save:/%d/caption.jpg", x);
-            
-            if(file_exist (nameFile_S)){
-                SDL_LoadImage(renderer, &saveFileImg[x], nameFile_S);
-            }
-            else{
-                SDL_LoadImage(renderer, &saveFileImg[x], "romfs:/missingSlot.png");
-            }
-        }
-
+        getCaption();
         selectSlotMenu(slot);
     }
     
+}
+
+
+void getCaption(){
+    for(int x = 0; x < (maxSlot + 1); x++){
+        char nameFile_S[29];
+        snprintf(nameFile_S, sizeof nameFile_S, "save:/%d/caption.jpg", x);
+        
+        if(file_exist (nameFile_S)){
+            SDL_LoadImage(renderer, &saveFileImg[x], nameFile_S);
+        }
+        else{
+            SDL_LoadImage(renderer, &saveFileImg[x], "romfs:/missingSlot.png");
+        }
+    }
 }
 
 int file_exist (char *filename)
@@ -71,6 +75,7 @@ void initServices(){
     currentPage = 1;
     currentState = 0;
     currentItem = 0;
+    maxSlot = 5;
     romfsInit();
     startSDLServices();
     
@@ -238,13 +243,13 @@ void MenuButtonsSlot(int x){
     switch(x){
         case 2:
             slot++;
-            if(slot == 6)
+            if(slot == maxSlot + 1)
                 slot = 0;
             break;
         case 3:
             slot--;
             if(slot == -1)
-                slot = 5;
+                slot = maxSlot;
             break;  
     }
 
@@ -497,6 +502,18 @@ int main(int argc, char **argv){
         if (kDown & KEY_DRIGHT) buttonLogic(2);
         if (kDown & KEY_DLEFT) buttonLogic(3);
         if (kDown & KEY_A) ConfirmButton();
+
+        if(currentState == 0 && kDown & KEY_R){
+            if(maxSlot == 7){
+                maxSlot = 5;
+            }
+            else{
+                maxSlot = 7;
+            }
+            slot = 0;
+            getCaption();
+            selectSlotMenu(slot);
+        }
 
         if(currentState != 0){
             if (kDown & KEY_B) BackButton();

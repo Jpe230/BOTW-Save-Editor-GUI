@@ -23,6 +23,7 @@ int positionKey;
 int key;
 int number;
 int currentItem;
+int maxSlot;
 
 int main(int argc, char **argv);
 void startSDLServices();
@@ -42,7 +43,7 @@ void dropMenuButtons(int x);
 void KeyboardLogic();
 void exitMen();
 int file_exist (char *filename);
-
+void getCaption();
 
 
 

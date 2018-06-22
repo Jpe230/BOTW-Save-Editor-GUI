@@ -36,7 +36,7 @@ SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 EXEFS_SRC	:=	exefs_src
-ROMFS	:=	romfs
+ROMFS	    :=	romfs
 
 APP_TITLE	:=	BOTW UI
 APP_AUTHOR	:=	Jpe230
