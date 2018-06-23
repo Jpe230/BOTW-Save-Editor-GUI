@@ -9,6 +9,7 @@ void selectSlotMenu(int slotchar){
 	SDL_DrawRect(renderer,0,648,1280,72, TOPBAR_COLOR);
 	SDL_DrawRect(renderer,30,648,1220,2, WHITE_COLOR);
 	SDL_DrawText(Arial, 110, 27, WHITE_TEXT_COLOR, "Breath of the Wild Editor");
+	SDL_DrawText(Arial_S, 1000, 670, WHITE_TEXT_COLOR, "A: Confirm | +: Exit");
 
 	SDL_DrawRect(renderer,380,148,517,400, LEFTBAR_COLOR);
 	SDL_DrawText(Arial_S,554,200, WHITE_TEXT_COLOR, "Select File Slot:");
@@ -61,7 +62,7 @@ void showCurrentRup(){
 
 	SDL_DrawImage(renderer, GreenRupee, 1077, 18, 35, 55);
 	char rupString[10];
-	snprintf(rupString, sizeof rupString, " : %d", rupeeValue);
+	snprintf(rupString, sizeof rupString, " : %d", (int)rupeeValue);
 	SDL_DrawText(Arial_S, 1112, 33, WHITE_TEXT_COLOR, rupString);
 
 
@@ -86,6 +87,7 @@ void mainUI(int x, int currentPage, int maxPage, int showBox, int BoxPos){
 	SDL_DrawRect(renderer,0,648,1280,72, TOPBAR_COLOR);
 	SDL_DrawRect(renderer,30,648,1220,2, WHITE_COLOR);
 	SDL_DrawText(Arial, 110, 27, WHITE_TEXT_COLOR, "Breath of the Wild Editor");
+	SDL_DrawText(Arial_S, 700, 670, WHITE_TEXT_COLOR, "A: Confirm | B: Cancel | Y: Edit Rupees | +: Exit");
 
 	setMenuItems(x, currentPage);
 
@@ -192,10 +194,10 @@ void showItemSDL(int currentItem, int arrow){
 	SDL_DrawRect(renderer, 470, 200, 750, 3, LEFTBAR_COLOR);
 
 	char value[25];
-	snprintf(value, sizeof value, "%d", newQuantItems[currentItem]);
+	snprintf(value, sizeof value, "%d", (int)newQuantItems[currentItem]);
 
 	SDL_DrawRect(renderer, 470, 240, 750, 3, LEFTBAR_COLOR);
-	SDL_DrawText(Arial_M, 480, 252, WHITE_TEXT_COLOR, "Quantity");
+	SDL_DrawText(Arial_M, 480, 252, WHITE_TEXT_COLOR, isArrow ? "Quantity" : "Durability");
 	SDL_DrawText(Arial_M, 1100, 252, BLUE_TEXT_COLOR, value);
 	SDL_DrawRect(renderer, 470, 300, 750, 3, LEFTBAR_COLOR);
 
@@ -203,7 +205,7 @@ void showItemSDL(int currentItem, int arrow){
 	if(strcmp(translateMods(new_modNames[currentItem]), "(none)")==0){
 			new_quantMod[currentItem] = 0;
 	}
-	snprintf(othervalue, sizeof othervalue, "%d", new_quantMod[currentItem]);
+	snprintf(othervalue, sizeof othervalue, "%d", (int)new_quantMod[currentItem]);
 
 	if(arrow == 0){
 		SDL_DrawRect(renderer, 470, 320, 750, 3, LEFTBAR_COLOR);
@@ -232,7 +234,7 @@ void Show_DropDownMenu(int pos){
 		SDL_DrawRect(renderer, 304, 552, 612, 90, TOPBAR_COLOR);
 	}
 	SDL_DrawText(Arial_M, 500, 475, WHITE_TEXT_COLOR, "Edit Modifier");
-	SDL_DrawText(Arial_M, 500, 580, WHITE_TEXT_COLOR, "Edit Quantity");
+	SDL_DrawText(Arial_M, 500, 580, WHITE_TEXT_COLOR, "Edit Value");
 
 	SDL_RenderPresent(renderer);
 
@@ -337,6 +339,7 @@ SDL_Surface *SDL_LoadImage(SDL_Renderer* renderer, SDL_Texture **texture, char *
 	}
 
 	SDL_FreeSurface(loaded_surface);
+	return NULL;
 }
 
 void SDL_DrawImage(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int w, int h)
