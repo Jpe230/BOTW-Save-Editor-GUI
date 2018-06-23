@@ -37,6 +37,10 @@ void startSDLServices(){
          errorScreen();
     }
     else{
+        if (file_exist("save:/6/caption.jpg"))
+            maxSlot = 7;
+        else
+            maxSlot = 5;
         getCaption();
         selectSlotMenu(slot);
     }
@@ -75,10 +79,8 @@ void initServices(){
     currentPage = 1;
     currentState = 0;
     currentItem = 0;
-    maxSlot = 5;
     romfsInit();
     startSDLServices();
-    
 }
 
 void setPages(){
@@ -502,18 +504,6 @@ int main(int argc, char **argv){
         if (kDown & KEY_DRIGHT) buttonLogic(2);
         if (kDown & KEY_DLEFT) buttonLogic(3);
         if (kDown & KEY_A) ConfirmButton();
-
-        if(currentState == 0 && kDown & KEY_R){
-            if(maxSlot == 7){
-                maxSlot = 5;
-            }
-            else{
-                maxSlot = 7;
-            }
-            slot = 0;
-            getCaption();
-            selectSlotMenu(slot);
-        }
 
         if(currentState <= 0){
             if (kDown & KEY_PLUS) break;

@@ -24,7 +24,7 @@ A Work in Progress Save Editor, currently it only to modifies rupees, durability
 
 # Compile
 
-- Use LibNX.
+- Use LibNX. Needs SDL2, SDL2_ttf, SDL2_gfx and SDL2_image.
 
 # Disclaimer
 
