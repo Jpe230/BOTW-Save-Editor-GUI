@@ -15,8 +15,6 @@ int mountSaveData()
 {
     int ret=0;
     Result rc = 0;
-    DIR* dir;
-    struct dirent* ent;
 
     FsFileSystem tmpfs;
     u128 userID=0;

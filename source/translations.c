@@ -1,3 +1,4 @@
+#include <string.h>
 char weapons[200][50] = {
 	"Weapon_Sword_001",
 	"Weapon_Sword_002",
