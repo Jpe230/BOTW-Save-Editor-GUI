@@ -9,7 +9,7 @@
 int main(int argc, char* argv[])
 {
 
-    BTWE::SaveFileEditor saveEditor("resources/game_data.sav");
+    BTWE::SaveFileEditor* saveEditor = new BTWE::SaveFileEditor("resources/game_data.sav");
 
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
@@ -20,37 +20,24 @@ int main(int argc, char* argv[])
     }
 
     brls::TabFrame* rootFrame = new brls::TabFrame();
-    rootFrame->setTitle("Borealis Example App");
+    rootFrame->setTitle("BOTW Save Editor");
     rootFrame->setIcon(BOREALIS_ASSET("icon/borealis.jpg"));
 
+    BTWE::Container home(saveEditor, rootFrame, "Home", "");
 
-    brls::List* testList = new brls::List();
+   /*  brls::List* testList = new brls::List();
+    
+    brls::IntegerInputListItem* testItem = new brls::IntegerInputListItem("Ruppees", 99, "Text");
+    testItem->setThumbnail("resources/icon/borealis.jpg");
 
-    brls::ListItem* dialogItem = new brls::ListItem("Open a dialog");
-    dialogItem->getClickEvent()->subscribe([](brls::View* view) {
-        brls::Dialog* dialog = new brls::Dialog("Warning: PozzNX will wipe all data on your Switch and render it inoperable, do you want to proceed?");
 
-        brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
-            dialog->close();
-            brls::Application::notify("Running PozzNX...");
-        };
-
-        dialog->addButton("Continue", closeCallback);
-        dialog->addButton("Continue", closeCallback);
-        dialog->addButton("Continue", closeCallback);
-
-        dialog->setCancelable(false);
-
-        dialog->open();
-    });
-
-    testList->addView(dialogItem);
+    testList->addView(testItem);
 
 
     rootFrame->addTab("First tab", testList);
     rootFrame->addSeparator();
     rootFrame->addTab("Third tab", new brls::Rectangle(nvgRGB(255, 0, 0)));
-    rootFrame->addTab("Fourth tab", new brls::Rectangle(nvgRGB(0, 255, 0)));
+    rootFrame->addTab("Fourth tab", new brls::Rectangle(nvgRGB(0, 255, 0))); */
 
     // Add the root view to the stack
     brls::Application::pushView(rootFrame);

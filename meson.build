@@ -9,6 +9,7 @@ source_files = files(
     'src/main.cpp',
     'src/BTWE/File.cpp',
     'src/BTWE/SaveFileEditor.cpp',
+    'src/BTWE/Container.cpp',
 
 )
 
