@@ -10,7 +10,7 @@ namespace BTWE
     class File
     {
         private:
-            FILE    *    file;
+            FILE        *file;
 
         public:
             std::string fileName;

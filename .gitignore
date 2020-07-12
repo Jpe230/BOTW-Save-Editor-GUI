@@ -1,5 +1,7 @@
 # General
 .DS_Store
+.build
+.*.nx
 .vscode
 .AppleDouble
 .LSOverride
@@ -28,6 +30,7 @@ Temporary Items
 .apdisk
 
 # Switch
+*.sav
 *.nro
 *.nca
 *.elf

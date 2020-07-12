@@ -1,10 +1,11 @@
 #include "headers/File.hpp"
+#include <dirent.h> 
 
 namespace BTWE
 {
     File::File(std::string fileName)
     {
-
+        
         file = fopen(fileName.c_str(), "r+b");
 
         /*Implement correct handler*/

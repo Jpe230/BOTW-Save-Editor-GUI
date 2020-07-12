@@ -7,7 +7,9 @@ subdir('borealis/library')
 
 source_files = files(
     'src/main.cpp',
-    'src/BTWE/File.cpp'
+    'src/BTWE/File.cpp',
+    'src/BTWE/SaveFileEditor.cpp',
+
 )
 
 BOTW_Save_Editor = executable(

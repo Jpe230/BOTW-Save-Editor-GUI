@@ -4,29 +4,42 @@
 #include <string>
 #include <map> 
 
+
 namespace BTWE
 {
     class SaveFileEditor
     {
         private:
-            static const char* const HEADER  [];
-            static const int VERSION [];
-            static const int FILESIZE[];
+            File saveFile;
+
+            std::map<std::string, u_int64_t> offsets;
+            std::map<std::string, u_int64_t> headers;
+
+            std::map<u_int64_t, std::string> hashes;
+
+            static const char* const VERSION [];
+            static const         int HEADER  [];
+            static const         int FILESIZE[];
+
+            static const int SIZEARR;
             
 
             std::string ReadString   (int offset, int len = 8);
             std::string ReadString64 (int offset, int arrayIndex = -1);
             std::string ReadString256(int offset);
             std::string LoadItemName (int offset);
+
+            bool        CheckValidity();
             
-            void        GetOffset();
+            void        GetOffsets(int index);
+            void        InitHashes();
+
+            void        LoadSaveFile();
             
             
         public:
-            File saveFile;
-            std::map<std::string, int> offsets;
-            std::map<std::string, int> headers;
             SaveFileEditor(std::string fileName);
+            SaveFileEditor();
 
     };
 }
