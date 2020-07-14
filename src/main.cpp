@@ -23,26 +23,7 @@ int main(int argc, char* argv[])
     rootFrame->setTitle("BOTW Save Editor");
     rootFrame->setIcon(BOREALIS_ASSET("icon/borealis.jpg"));
 
-    BTWE::Container home(saveEditor, rootFrame, "Home", "");
-
-   /*  brls::List* testList = new brls::List();
-    
-    brls::IntegerInputListItem* testItem = new brls::IntegerInputListItem("Ruppees", 99, "Text");
-    testItem->setThumbnail("resources/icon/borealis.jpg");
-
-
-    testList->addView(testItem);
-
-
-    rootFrame->addTab("First tab", testList);
-    rootFrame->addSeparator();
-    rootFrame->addTab("Third tab", new brls::Rectangle(nvgRGB(255, 0, 0)));
-    rootFrame->addTab("Fourth tab", new brls::Rectangle(nvgRGB(0, 255, 0))); */
-
-    // Add the root view to the stack
     brls::Application::pushView(rootFrame);
-
-    
 
     // Run the app
     while (brls::Application::mainLoop());    

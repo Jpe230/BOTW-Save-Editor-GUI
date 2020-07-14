@@ -1,5 +1,6 @@
 #include "headers/SaveFileEditor.hpp"
 #include "headers/Container.hpp"
+#include "headers/ItemInput.hpp"
 #include <borealis.hpp>
 #include <vector> 
 
@@ -73,11 +74,11 @@ namespace BTWE{
     {
 		std::string v = "";
 
-		for(int i=0; i<len; i++)
+        for(int i=0; i<len; i++)
         {
-			v += saveFile.readString(offset,4);
-			offset+=8;
-		}
+            v += saveFile.readString(offset,4);
+            offset+=8;
+        }
 
         //string cleanup
         v.erase(std::find(v.begin(), v.end(), '0'), v.end());
