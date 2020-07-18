@@ -1,19 +1,16 @@
 #include "Headers/Container.hpp"
-
+#include "Headers/ItemInput.hpp"
 #include "headers/SaveFileEditor.hpp"
 
 
 namespace BTWE
 {
-    Container::Container(SaveFileEditor* fileEditor, brls::TabFrame* rootFrame, std::string title, std::string icon)
+    Container::Container(brls::TabFrame* rootFrame, std::string title, std::string icon)
     {
-        FileEditor = fileEditor;
         RootFrame = rootFrame;
         Title = title;
         Icon = icon;
         List = new brls::List();
-       
-        FileEditor->LoadHomeTab(this);
     }
 
     void Container::AddItem(brls::View* view)
@@ -25,6 +22,11 @@ namespace BTWE
     {
         Items[id] = item;
         AddItem(item);
+    }
+
+    void Container::AddInput(ItemInput* item)
+    {
+        AddItem(item->GetView());
     }
 
     void Container::PushtoView()

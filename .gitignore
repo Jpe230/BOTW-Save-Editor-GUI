@@ -1,7 +1,7 @@
 # General
 .DS_Store
 .build
-.*.nx
+.build.nx/
 .vscode
 .AppleDouble
 .LSOverride
@@ -38,3 +38,6 @@ Temporary Items
 *.nso
 *.pfs0
 build/
+build.nx/
+
+borealis/example/

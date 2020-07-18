@@ -1,27 +1,244 @@
 #include "headers/SaveFileEditor.hpp"
 #include "headers/Container.hpp"
 #include "headers/ItemInput.hpp"
-#include <borealis.hpp>
+#include "headers/Translations.hpp"
 #include <vector> 
+#include <algorithm>
+
 
 namespace BTWE{
 
     const char* const SaveFileEditor::VERSION[]  = {"v1.0", "v1.1", "v1.2", "v1.3", "v1.3.1", "Kiosk", "v1.3.3", "v1.3.4", "v1.4", "v1.5", "v1.5*", "v1.6", "v1.6*", "v1.6**", "v1.6***"};
     const int         SaveFileEditor::FILESIZE[] = {896976, 897160, 897112, 907824, 907824,   916576,  1020648,  1020648,  1027208,1027208,1027248, 1027216,1027216, 1027216 , 1027216};
     const int         SaveFileEditor::HEADER[]   = {0x24e2, 0x24ee, 0x2588, 0x29c0, 0x2a46,   0x2f8e,  0x3ef8,   0x3ef9,   0x471a, 0x471b, 0x471b,  0x471e, 0x0f423d,0x0f423e, 0x0f423f};
+    const int         SaveFileEditor::MAX_ITEMS  = 420;
+    const u_int64_t   SaveFileEditor::HashKey[]  = 
+    {
+        0x0bee9e46, //'MAP'
+        0x0cbf052a, //'FLAGS_BOW'
+        0x1e3fd294, //'FLAGSV_BOW'
+        0x23149bf8, //'RUPEES'
+        0x2906f327, //'MAX_HEARTS'
+        0x333aa6e5, //'HORSE_SADDLES'
+        0x3adff047, //'MAX_STAMINA'
+        0x441b7231, //'DEFEATED_MOLDUGA_COUNTER'
+        0x54679940, //'DEFEATED_HINOX_COUNTER'
+        0x57ee221d, //'FLAGS_WEAPON'
+        0x5f283289, //'ITEMS'
+        0x6150c6be, //'HORSE_REINS'
+        0x698266be, //'DEFEATED_TALUS_COUNTER'
+        0x69f17e8a, //'FLAGSV_SHIELD'
+        0x6a09fc59, //'ITEMS_QUANTITY'
+        0x73c29681, //'PLAYTIME'
+        0x7b74e117, //'HORSE_NAMES'
+        0x8a94e07a, //'KOROK_SEED_COUNTER'
+        0x9383490e, //'MapApp_MapIconNo'
+        0x97f925c3, //'RELIC_GERUDO'
+        0x982ba201, //'HORSE_POSITION'
+        0x9c6cfd3f, //'HORSE_MANES'
+        0xa40ba103, //'PLAYER_POSITION'
+        0xa6d926bc, //'FLAGSV_WEAPON'
+        0xc247b696, //'HORSE_TYPES'
+        0xc5238d2b, //'FLAGS_SHIELD'
+        0xc9328299, //'MOTORCYCLE'
+        0xce7afed3, //'MONS'
+        0xd913b769, //'MAPTYPE'
+        0xe1a0ca54, //'HORSE_BONDS'
+        0xea9def3f, //'MapApp_MapIconPos'
+        0xf1cf4807, //'RELIC_GORON'
+        0xfda0cde4 //'RELIC_RITO
+    };
 
     const int SaveFileEditor::SIZEARR = 15;
-
   
-    SaveFileEditor::SaveFileEditor(std::string fileName) : saveFile(fileName)
+    SaveFileEditor::SaveFileEditor(std::string fileName, brls::TabFrame* root) : saveFile(fileName)
     {
-       
+        Root = root;
+
+        HomeContainer     = new Container(Root, "Home"    , "");
+        WeaponContainer   = new Container(Root, "Weapon"  , "");
+        BowContainer      = new Container(Root, "Bow"     , "");
+        ShieldContainer   = new Container(Root, "Shield"  , "");
+        ClotheContainer   = new Container(Root, "Clothe"  , "");
+        MaterialContainer = new Container(Root, "Material", "");
+        FoodContainer     = new Container(Root, "Food"    , "");
+        OtherContainer    = new Container(Root, "Other"   , "");
+
         bool validity = CheckValidity();
 
         if(!validity) {
             std::exit(0);
         }
 
+        translations = new Translations();
+
+        Load();
+
+    }
+
+    void SaveFileEditor::Load()
+    {
+        
+        HomeContainer->AddItem(new brls::Header("Statistics"));
+
+        AddIntInput("rupees"       , "Rupees"                      , saveFile.readU32(offsets["RUPEES"])      , 6, HomeContainer);
+        AddIntInput("mons"         , "Mons"                        , saveFile.readU32(offsets["MONS"])        , 6, HomeContainer);
+        AddIntInput("relic-gerundo", "Gerundo Relic remaining uses", saveFile.readU32(offsets["RELIC_GERUDO"]), 2, HomeContainer);
+        AddIntInput("relic-goron"  , "Goron Relic remaining uses"  , saveFile.readU32(offsets["RELIC_GORON"]) , 2, HomeContainer);
+        AddIntInput("relic-rito"   , "Rito Relic remaining uses"   , saveFile.readU32(offsets["RELIC_RITO"])  , 2, HomeContainer);
+
+        AddNonInput("Playtime", ToTime(saveFile.readU32(offsets["PLAYTIME"])), HomeContainer);
+
+        /*Max Hearts*/
+        std::map<u_int8_t, std::string>::iterator heart_It = hearts.begin();
+        std::vector<std::string> heartList;
+
+        int selectedHeart = 0;
+        int secondCounter = 0;
+
+        while (heart_It != hearts.end())
+        {
+            u_int8_t key = heart_It->first;
+            if(key == saveFile.readU8(offsets["MAX_HEARTS"]))
+               selectedHeart = secondCounter;
+
+            std::string value = heart_It->second;
+            heartList.push_back(value);
+
+            heart_It++;
+            secondCounter++;
+        }
+        AddSelectInput("MAX_HEARTS", "Max. Hearts", heartList, selectedHeart, HomeContainer);
+        
+        std::map<u_int32_t, std::string>::iterator stamina_It = stamina.begin();
+        std::vector<std::string> staminaList;
+
+        int selectedStamina = 0;
+        secondCounter = 0;
+
+        while (stamina_It != stamina.end())
+        {
+            u_int32_t key = stamina_It->first;
+            if(key == saveFile.readU32(offsets["MAX_STAMINA"]))
+               selectedHeart = secondCounter;
+
+            std::string value = stamina_It->second;
+            staminaList.push_back(value);
+
+            stamina_It++;
+            secondCounter++;
+        }
+
+        AddSelectInput("MAX_STAMINA", "Max. Stamina", staminaList, selectedStamina, HomeContainer);
+
+        HomeContainer->AddItem(new brls::Header("Coordinates"));
+
+        AddFloatInput("pos-x", "Current Link Coords. X", saveFile.readF32(offsets["PLAYER_POSITION"]), HomeContainer);
+        AddFloatInput("pos-y", "Current Link Coords. Y", saveFile.readF32(offsets["PLAYER_POSITION"] + 8), HomeContainer);
+        AddFloatInput("pos-z", "Current Link Coords. Z", saveFile.readF32(offsets["PLAYER_POSITION"] + 16), HomeContainer);
+
+       
+        HomeContainer->AddItem(new brls::Header("Completionism"));
+
+        AddNonInput("Korok Seeds", std::to_string(saveFile.readU32(offsets["KOROK_SEED_COUNTER"])), HomeContainer);
+        AddNonInput("Defeated Hinox", std::to_string(saveFile.readU32(offsets["DEFEATED_HINOX_COUNTER"])), HomeContainer);
+        AddNonInput("Defeated Talus", std::to_string(saveFile.readU32(offsets["DEFEATED_TALUS_COUNTER"])), HomeContainer);
+        AddNonInput("Defeated Molduga", std::to_string(saveFile.readU32(offsets["DEFEATED_MOLDUGA_COUNTER"])), HomeContainer);
+       
+
+
+        /*Map Select Box*/
+        /*
+        std::vector<std::string> mapOptions;
+        for(int i = 0; i<10; i++)
+        {
+            for(int j = 0; j<8; j++)
+            {
+                std::string option = (char)(65 + 1) + "-" + std::to_string(j+1);
+                mapOptions.push_back(option);
+            }
+        }
+
+        for(int i = 0; i<120; i++)
+        {
+            std::string option  = "Dungeon";
+            if(i<100)   option += "0";
+            if(i<10)    option += "0";
+            
+            option += std::to_string(i);
+        }
+
+        mapOptions.push_back("RemainsElectric");
+        mapOptions.push_back("RemainsFire"    );
+        mapOptions.push_back("RemainsWater"   );
+        mapOptions.push_back("RemainsWind"    );
+
+
+        AddSelectInput("map", "Map", mapOptions, HomeList);
+       */
+
+        int modifiers[] = {0, 0, 0};
+        int search = 0; ///0:weapons, 1:bows, 2:shields
+
+        for(int i = 0; i < MAX_ITEMS; i++)
+        {
+            std::string itemNameId = LoadItemName(i);
+            if(itemNameId == "") break;
+
+            Container* container = GetItemContainer(itemNameId);
+            container->AddItem(new brls::ListItem(itemNameId));
+        }
+
+        HomeContainer->PushtoView();
+        WeaponContainer->PushtoView();
+        BowContainer->PushtoView();
+        ShieldContainer->PushtoView();
+        ClotheContainer->PushtoView();
+        MaterialContainer->PushtoView();
+        FoodContainer->PushtoView();
+        OtherContainer->PushtoView();
+    }
+
+    Container* SaveFileEditor::GetItemContainer(std::string nameId)
+    {
+        //LIKE REALLY, I DONT KNOW WHAT IM DOING
+        
+        for (auto& trans : translations->translations["Translations"].items())
+        {
+            if(trans.value()["items"].contains(nameId))
+            {
+                std::string v = trans.value()["id"];
+                return ContainerMap[v];
+            }
+        }
+
+        return OtherContainer;
+    }
+
+    void SaveFileEditor::AddFloatInput(std::string id, std::string label, float value, Container* container)
+    {
+        ItemInput* item = new ItemInput(label, id, value, 0, 6);
+        container->AddInput(item);
+    }
+
+    void SaveFileEditor::AddNonInput(std::string label, std::string value, Container* container)
+    {
+        ItemInput* item = new ItemInput(label, value);
+        container->AddInput(item);
+    }
+
+    void SaveFileEditor::AddSelectInput(std::string id, std::string label, std::vector<std::string> options, int selectedValue, Container* container)
+    {
+        ItemInput* item = new ItemInput(label, id, options, selectedValue);
+        container->AddInput(item);
+        InputList[id] = item;
+    }
+
+    void SaveFileEditor::AddIntInput(std::string id, std::string label, int value, int maxValue, Container* container)
+    {
+        ItemInput* item = new ItemInput(label, id, value, maxValue);
+        container->AddInput(item);
+        InputList[id] = item;
     }
 
     bool SaveFileEditor::CheckValidity()
@@ -45,116 +262,6 @@ namespace BTWE{
         return false;
     }
 
-    void SaveFileEditor::GetOffsets(int index)
-    {
-        InitHashes();
-        int startSearchOffset = 0x0c;
-
-        for(int i=0; i<hashes.size(); i++)
-        {
-            for(int j=startSearchOffset; j<saveFile.fileSize; j+=4)
-            {
-                u_int64_t value = saveFile.readU32(j);
-
-                if (hashes.find(value) == hashes.end()) {} 
-                else {
-                    
-                    offsets[hashes[value]] = j+4;
-                    headers[hashes[value]] = value;
-                    startSearchOffset = j+4;
-
-                    //There should be a break where dunno why is not working
-                    //break;
-                }
-            }
-        }
-    }
-
-    std::string SaveFileEditor::ReadString(int offset, int len)
-    {
-		std::string v = "";
-
-        for(int i=0; i<len; i++)
-        {
-            v += saveFile.readString(offset,4);
-            offset+=8;
-        }
-
-        //string cleanup
-        v.erase(std::find(v.begin(), v.end(), '0'), v.end());
-
-		return v;
-    }
-
-    std::string SaveFileEditor::ReadString64(int offset, int arrayIndex)
-    {
-        if(arrayIndex > -1)
-            offset += 0x80 * arrayIndex;
-
-        return ReadString(offset, 16);
-    }
-
-    void SaveFileEditor::LoadHomeTab(Container* container)
-    {
-        container->AddItem(new brls::Label(brls::LabelStyle::LIST_ITEM, "Statistics"));
-
-        container->AddInput(new brls::IntegerInputListItem("Rupees", saveFile.readU32(offsets["RUPEES"]), "Modify Rupees", "", 6), "RUPEES");
-        container->AddInput(new brls::IntegerInputListItem("Mons"  , saveFile.readU32(offsets["MONS"]), "Modify Mons", "", 6), "MONS");
-
-        container->AddInput(new brls::IntegerInputListItem("Gerudo relic remaining uses", saveFile.readU32(offsets["RELIC_GERUDO"]), "Modify Mons", "", 6), "RELIC_GERUDO");
-        container->AddInput(new brls::IntegerInputListItem("Goron relic remaining uses",  saveFile.readU32(offsets["RELIC_GORON"]), "Modify Mons", "", 6), "RELIC_GORON");
-        container->AddInput(new brls::IntegerInputListItem("Rito relic remaining uses",   saveFile.readU32(offsets["RELIC_RITO"]), "Modify Mons", "", 6), "RELIC_RITO");
-
-        container->AddItem(new brls::SelectListItem("Playtime", {ToTime(saveFile.readU32(offsets["PLAYTIME"]))}));
-
-        
-        std::map<u_int8_t, std::string>::iterator heart_It = hearts.begin();
-        std::vector<std::string> heartList;
-
-        int selectedHeart = 0;
-        int secondCounter = 0;
-
-        while (heart_It != hearts.end())
-        {
-            u_int8_t key = heart_It->first;
-            if(key == saveFile.readU8(offsets["MAX_HEARTS"]))
-               selectedHeart = secondCounter;
-
-            std::string value = heart_It->second;
-            heartList.push_back(value);
-
-            heart_It++;
-            secondCounter++;
-        }
-        container->AddInput(new brls::SelectListItem("Max. Hearts", heartList, selectedHeart), "MAX_HEARTS");
-        
-        std::map<u_int32_t, std::string>::iterator stamina_It = stamina.begin();
-        std::vector<std::string> staminaList;
-
-        int selectedStamina = 0;
-        secondCounter = 0;
-
-        while (stamina_It != stamina.end())
-        {
-            u_int32_t key = stamina_It->first;
-            if(key == saveFile.readU32(offsets["MAX_STAMINA"]))
-               selectedHeart = secondCounter;
-
-            std::string value = stamina_It->second;
-            staminaList.push_back(value);
-
-            stamina_It++;
-            secondCounter++;
-        }
-
-
-        container->AddInput(new brls::SelectListItem("Max. Stamina", staminaList, selectedStamina), "MAX_STAMINA");
-
-        container->AddItem(new brls::Label(brls::LabelStyle::LIST_ITEM, "Coordinates"));
-
-        container->PushtoView();
-    }
-
     std::string SaveFileEditor::ToTime(u_int32_t value)
     {
         int seconds = value%60;
@@ -175,6 +282,14 @@ namespace BTWE{
 
     void SaveFileEditor::InitHashes()
     {
+        ContainerMap["weapons"]   = WeaponContainer;
+        ContainerMap["bows"]      = BowContainer;
+        ContainerMap["shields"]   = ShieldContainer;
+        ContainerMap["clothes"]   = ClotheContainer;
+        ContainerMap["materials"] = MaterialContainer;
+        ContainerMap["food"]      = FoodContainer;
+        ContainerMap["other"]     = OtherContainer;
+
         hashes[(u_int64_t)0x0bee9e46] = "MAP";
         hashes[(u_int64_t)0x0cbf052a] = "FLAGS_BOW";
         hashes[(u_int64_t)0x1e3fd294] = "FLAGSV_BOW";
@@ -209,7 +324,7 @@ namespace BTWE{
         hashes[(u_int64_t)0xf1cf4807] = "RELIC_GORON";
         hashes[(u_int64_t)0xfda0cde4] = "RELIC_RITO";
 
-        hearts[4  ] = "1";
+        hearts[4  ] = "1 heart";
         hearts[8  ] = "2 hearts";
         hearts[12 ] = "3 hearts";
         hearts[16 ] = "4 hearts";
@@ -253,5 +368,60 @@ namespace BTWE{
         stamina[1161527296] = "3 wheels";
 
     }
+
+    void SaveFileEditor::GetOffsets(int index)
+    {
+        InitHashes();
+        int startSearchOffset = 0x0c;
+
+        for(int i=0; i<hashes.size(); i++)
+        {
+            for(int j=startSearchOffset; j<saveFile.fileSize; j+=4)
+            {
+                u_int64_t value = saveFile.readU32(j);
+
+                if (hashes.find(value) == hashes.end()) {} 
+                else {
+                    if(HashKey[i] == value)
+                    {
+                        offsets[hashes[HashKey[i]]] = j+4;
+                        headers[hashes[HashKey[i]]] = HashKey[i];
+                        startSearchOffset = j+8;
+                        break;
+                    }  
+                }
+            }
+        }
+    }
+
+    std::string SaveFileEditor::LoadItemName(int index)
+    {
+        return ReadString64(offsets["ITEMS"] + index * 0x80);
+    }
+
+    std::string SaveFileEditor::ReadString(int offset, int len)
+    {
+		std::string v = "";
+
+        for(int i=0; i<len; i++)
+        {
+            v += saveFile.readString(offset,4);
+            offset+=8;
+        }
+
+        //string cleanup
+        v.erase(std::find(v.begin(), v.end(), '\0'), v.end());
+
+		return v;
+    }
+
+    std::string SaveFileEditor::ReadString64(int offset, int arrayIndex)
+    {
+        if(arrayIndex > -1)
+            offset += 0x80 * arrayIndex;
+
+        return ReadString(offset, 16);
+    }
+
 }
 

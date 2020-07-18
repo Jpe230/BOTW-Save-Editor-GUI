@@ -3,3 +3,4 @@
 #include "headers/File.hpp"
 #include "headers/SaveFileEditor.hpp"
 #include "headers/Container.hpp"
+#include "headers/Translations.hpp"

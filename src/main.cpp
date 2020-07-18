@@ -1,16 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <borealis.hpp>
-
 #include "BTWE/BTWE.hpp"
 #include <string>
 
 int main(int argc, char* argv[])
 {
 
-    BTWE::SaveFileEditor* saveEditor = new BTWE::SaveFileEditor("resources/game_data.sav");
-
+    
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
     if (!brls::Application::init("Borealis example"))
@@ -22,6 +19,10 @@ int main(int argc, char* argv[])
     brls::TabFrame* rootFrame = new brls::TabFrame();
     rootFrame->setTitle("BOTW Save Editor");
     rootFrame->setIcon(BOREALIS_ASSET("icon/borealis.jpg"));
+
+    BTWE::SaveFileEditor* saveEditor = new BTWE::SaveFileEditor("resources/game_data.sav", rootFrame);
+
+    //BTWE::Container home(saveEditor, rootFrame, "Home", "");
 
     brls::Application::pushView(rootFrame);
 
