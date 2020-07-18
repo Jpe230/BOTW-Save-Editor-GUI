@@ -524,6 +524,9 @@ bool Application::handleAction(char button)
 {
     View* hintParent = Application::currentFocus;
     std::set<Key> consumedKeys;
+    
+    if (hintParent == nullptr)
+        hintParent = Application::viewStack[Application::viewStack.size() - 1];
 
     while (hintParent != nullptr)
     {
@@ -804,7 +807,7 @@ void Application::pushView(View* view, ViewAnimation animation)
         view->alpha = 0.0f;
 
     // Focus
-    if (Application::viewStack.size() > 0)
+    if (Application::viewStack.size() > 0 && Application::currentFocus != nullptr)
     {
         Logger::debug("Pushing %s to the focus stack", Application::currentFocus->describe().c_str());
         Application::focusStack.push_back(Application::currentFocus);
