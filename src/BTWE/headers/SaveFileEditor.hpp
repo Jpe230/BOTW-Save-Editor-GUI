@@ -62,6 +62,8 @@ namespace BTWE
             static const         int FILESIZE[];
             static const   u_int64_t HashKey [];
 
+            int currentItem;
+
             static const int SIZEARR;
             static const int MAX_ITEMS;
             
@@ -73,6 +75,8 @@ namespace BTWE
             std::string ToTime       (u_int32_t value);
 
             Container* GetItemContainer(std::string nameId);
+            std::string GetItemTranslation(std::string itemNameId);
+            int  GetItemQuantityOffset(int index);
 
             bool        CheckValidity();
             
@@ -89,6 +93,8 @@ namespace BTWE
             void AddFloatInput(std::string id, std::string label, float value, Container* container);
             void AddIntInput(std::string id, std::string label, int value, int maxValue, Container* container);
             void AddSelectInput(std::string id, std::string label, std::vector<std::string> options, int selectedValue, Container* container);
+            void AddItemInput(int index,Container* container);
+            
 
     };
 }

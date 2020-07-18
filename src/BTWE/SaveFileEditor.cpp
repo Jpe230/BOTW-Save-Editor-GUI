@@ -72,6 +72,8 @@ namespace BTWE{
 
         translations = new Translations();
 
+        currentItem = 0;
+
         Load();
 
     }
@@ -186,7 +188,7 @@ namespace BTWE{
             if(itemNameId == "") break;
 
             Container* container = GetItemContainer(itemNameId);
-            container->AddItem(new brls::ListItem(itemNameId));
+            AddItemInput(i, container);
         }
 
         HomeContainer->PushtoView();
@@ -241,6 +243,38 @@ namespace BTWE{
         InputList[id] = item;
     }
 
+    void SaveFileEditor::AddItemInput(int index, Container* container)
+    {
+        std::string itemNameId = LoadItemName(index);
+        u_int32_t itemValue = saveFile.readU32(GetItemQuantityOffset(index));
+
+        std::string itemId = "item-number-" + std::to_string(currentItem);
+        currentItem++;
+
+        std::string label = GetItemTranslation(itemNameId);
+
+        AddNonInput(label, std::to_string(itemValue), container);
+
+    }
+
+    std::string SaveFileEditor::GetItemTranslation(std::string itemNameId)
+    {
+        for (auto& trans : translations->translations["Translations"].items())
+        {
+            if(trans.value()["items"].contains(itemNameId))
+            {
+                std::string v = trans.value()["items"][itemNameId];
+                return v;
+            }
+        }
+
+        return itemNameId;
+    }
+
+    int SaveFileEditor::GetItemQuantityOffset(int index)
+    {
+        return offsets["ITEMS_QUANTITY"] + index * 0x08;
+    }    
     bool SaveFileEditor::CheckValidity()
     {
         int versionHash = saveFile.readU32(0);
