@@ -299,7 +299,7 @@ void View::drawHighlight(NVGcontext* vg, ThemeValues* theme, float alpha, Style*
     nvgRestore(vg);
 }
 
-void View::setBackground(Background background)
+void View::setBackground(ViewBackground background)
 {
     this->background = background;
 }
@@ -308,7 +308,7 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style* style)
 {
     switch (this->background)
     {
-        case Background::SIDEBAR:
+        case ViewBackground::SIDEBAR:
         {
             unsigned backdropHeight = style->Background.sidebarBorderHeight;
 
@@ -334,7 +334,7 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style* style)
             nvgFill(vg);
             break;
         }
-        case Background::DEBUG:
+        case ViewBackground::DEBUG:
         {
             nvgFillColor(vg, RGB(255, 0, 0));
             nvgBeginPath(vg);
@@ -342,14 +342,14 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style* style)
             nvgFill(vg);
             break;
         }
-        case Background::BACKDROP:
+        case ViewBackground::BACKDROP:
         {
             nvgFillColor(vg, a(ctx->theme->backdropColor));
             nvgBeginPath(vg);
             nvgRect(vg, this->x, this->y, this->width, this->height);
             nvgFill(vg);
         }
-        case Background::NONE:
+        case ViewBackground::NONE:
             break;
     }
 }
@@ -515,7 +515,7 @@ unsigned View::getShowAnimationDuration(ViewAnimation animation)
 
 void View::show(std::function<void(void)> cb, bool animate, ViewAnimation animation)
 {
-    brls::Logger::debug("Showing %s with animation %d", this->describe().c_str(), animation);
+    brls::Logger::debug("Showing {} with animation {}", this->describe(), animation);
 
     this->hidden = false;
 
@@ -555,7 +555,7 @@ void View::show(std::function<void(void)> cb, bool animate, ViewAnimation animat
 
 void View::hide(std::function<void(void)> cb, bool animated, ViewAnimation animation)
 {
-    brls::Logger::debug("Hiding %s with animation %d", this->describe().c_str(), animation);
+    brls::Logger::debug("Hiding {} with animation {}", this->describe(), animation);
 
     this->hidden = true;
     this->fadeIn = false;

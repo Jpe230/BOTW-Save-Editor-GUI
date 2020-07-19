@@ -25,52 +25,46 @@ namespace brls
 {
 
 Sidebar::Sidebar()
-    : BoxLayout(BoxLayoutOrientation::VERTICAL)
+    : List()
 {
     Style* style = Application::getStyle();
 
     this->setWidth(style->Sidebar.width);
     this->setSpacing(style->Sidebar.spacing);
     this->setMargins(style->Sidebar.marginTop, style->Sidebar.marginRight, style->Sidebar.marginBottom, style->Sidebar.marginLeft);
-    this->setBackground(Background::SIDEBAR);
+    this->setBackground(ViewBackground::SIDEBAR);
 }
 
 View* Sidebar::getDefaultFocus()
 {
-    // Sanity check
-    if (this->lastFocus >= this->children.size())
-        this->lastFocus = 0;
-
     View* toFocus{ nullptr };
     // Try to focus last focused one
-    if(this->children.size() != 0)
-        toFocus = this->children[this->lastFocus]->view->getDefaultFocus();
+    if(this->sidebarItems.size() != 0)
+        toFocus = this->currentActive->getDefaultFocus();
     
     if (toFocus)
         return toFocus;
 
     // Otherwise just get the first available item
-    return BoxLayout::getDefaultFocus();
+    return List::getDefaultFocus();
 }
 
 void Sidebar::onChildFocusGained(View* child)
 {
-    size_t position = *((size_t*)child->getParentUserData());
-
-    this->lastFocus = position;
-
-    BoxLayout::onChildFocusGained(child);
+    List::onChildFocusGained(child);
 }
 
-SidebarItem* Sidebar::addItem(std::string label, View* view)
+SidebarItem* Sidebar::addItem(std::string label, u_int64_t viewId)
 {
     SidebarItem* item = new SidebarItem(label, this);
-    item->setAssociatedView(view);
+    item->setAssociatedViewId(viewId);
+    this->sidebarItems.push_back(item);
 
-    if (this->isEmpty())
+    if (this->sidebarItems.size() == 1)
         setActive(item);
 
     this->addView(item);
+    
 
     return item;
 }
@@ -150,6 +144,11 @@ void SidebarItem::setAssociatedView(View* view)
     this->associatedView = view;
 }
 
+void SidebarItem::setAssociatedViewId(u_int64_t viewId)
+{
+    this->associatedViewId = viewId;
+}
+
 bool SidebarItem::isActive()
 {
     return this->active;
@@ -164,6 +163,11 @@ void SidebarItem::onFocusGained()
 View* SidebarItem::getAssociatedView()
 {
     return this->associatedView;
+}
+
+u_int64_t SidebarItem::getAssociatedViewId()
+{
+    return this->associatedViewId;
 }
 
 SidebarItem::~SidebarItem()

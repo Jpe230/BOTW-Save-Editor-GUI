@@ -72,12 +72,12 @@ void NotificationManager::notify(std::string text)
 
     if (!found)
     {
-        brls::Logger::info("Discarding notification \"%s\"", text.c_str());
+        brls::Logger::info("Discarding notification \"{}\"", text);
         return;
     }
 
     // Create the notification
-    brls::Logger::info("Showing notification \"%s\"", text.c_str());
+    brls::Logger::info("Showing notification \"{}\"", text);
 
     Notification* notification = new Notification(text);
     notification->setParent(this);
@@ -155,7 +155,7 @@ NotificationManager::~NotificationManager()
 
 Notification::Notification(std::string text)
 {
-    this->setBackground(Background::BACKDROP);
+    this->setBackground(ViewBackground::BACKDROP);
 
     this->label = new Label(LabelStyle::NOTIFICATION, text, true);
     label->setParent(this);

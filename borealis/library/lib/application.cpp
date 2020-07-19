@@ -82,25 +82,25 @@ static void windowFramebufferSizeCallback(GLFWwindow* window, int width, int hei
 
     Application::resizeNotificationManager();
 
-    Logger::info("Window size changed to %dx%d", width, height);
-    Logger::info("New scale factor is %f", Application::windowScale);
+    Logger::info("Window size changed to {}x{}", width, height);
+    Logger::info("New scale factor is {}", Application::windowScale);
 }
 
 static void joystickCallback(int jid, int event)
 {
     if (event == GLFW_CONNECTED)
     {
-        Logger::info("Joystick %d connected", jid);
+        Logger::info("Joystick {} connected", jid);
         if (glfwJoystickIsGamepad(jid))
-            Logger::info("Joystick %d is gamepad: \"%s\"", jid, glfwGetGamepadName(jid));
+            Logger::info("Joystick {} is gamepad: \"{}\"", jid, glfwGetGamepadName(jid));
     }
     else if (event == GLFW_DISCONNECTED)
-        Logger::info("Joystick %d disconnected", jid);
+        Logger::info("Joystick {} disconnected", jid);
 }
 
 static void errorCallback(int errorCode, const char* description)
 {
-    Logger::error("[GLFW:%d] %s", errorCode, description);
+    Logger::error("[GLFW:{}] {}", errorCode, description);
 }
 
 static void windowKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -183,7 +183,7 @@ bool Application::init(std::string title, Style style, Theme theme)
     Application::window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, title.c_str(), nullptr, nullptr);
     if (!window)
     {
-        Logger::error("glfw: failed to create window\n");
+        Logger::error("glfw: failed to create window");
         glfwTerminate();
         return false;
     }
@@ -199,14 +199,14 @@ bool Application::init(std::string title, Style style, Theme theme)
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    Logger::info("GL Vendor: %s", glGetString(GL_VENDOR));
-    Logger::info("GL Renderer: %s", glGetString(GL_RENDERER));
-    Logger::info("GL Version: %s", glGetString(GL_VERSION));
+    Logger::info("GL Vendor: {}", glGetString(GL_VENDOR));
+    Logger::info("GL Renderer: {}", glGetString(GL_RENDERER));
+    Logger::info("GL Version: {}", glGetString(GL_VERSION));
 
     if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
     {
         GLFWgamepadstate state;
-        Logger::info("Gamepad detected: %s", glfwGetGamepadName(GLFW_JOYSTICK_1));
+        Logger::info("Gamepad detected: {}", glfwGetGamepadName(GLFW_JOYSTICK_1));
         glfwGetGamepadState(GLFW_JOYSTICK_1, &state);
     }
 
@@ -559,6 +559,9 @@ void Application::frame()
     frameContext.fontStash  = &Application::fontStash;
     frameContext.theme      = Application::getThemeValues();
 
+    if (Application::background)
+        Application::background->preFrame();
+
     nvgBeginFrame(Application::vg, Application::windowWidth, Application::windowHeight, frameContext.pixelRatio);
     nvgScale(Application::vg, Application::windowScale, Application::windowScale);
 
@@ -584,6 +587,9 @@ void Application::frame()
             break;
     }
 
+    if (Application::background)
+        Application::background->frame(&frameContext);
+
     for (size_t i = 0; i < viewsToDraw.size(); i++)
     {
         View* view = viewsToDraw[viewsToDraw.size() - 1 - i];
@@ -600,6 +606,9 @@ void Application::frame()
     // End frame
     nvgResetTransform(Application::vg); // scale
     nvgEndFrame(Application::vg);
+
+    if (Application::background)
+        Application::background->postFrame();
 }
 
 void Application::exit()
@@ -690,7 +699,7 @@ void Application::giveFocus(View* view)
         if (newFocus)
         {
             newFocus->onFocusGained();
-            Logger::debug("Giving focus to %s", newFocus->describe().c_str());
+            Logger::debug("Giving focus to {}", newFocus->describe());
         }
     }
 }
@@ -749,7 +758,7 @@ void Application::popView(ViewAnimation animation, std::function<void(void)> cb)
     {
         View* newFocus = Application::focusStack[Application::focusStack.size() - 1];
 
-        Logger::debug("Giving focus to %s, and removing it from the focus stack", newFocus->describe().c_str());
+        Logger::debug("Giving focus to {}, and removing it from the focus stack", newFocus->describe());
 
         Application::giveFocus(newFocus);
         Application::focusStack.pop_back();
@@ -809,7 +818,7 @@ void Application::pushView(View* view, ViewAnimation animation)
     // Focus
     if (Application::viewStack.size() > 0 && Application::currentFocus != nullptr)
     {
-        Logger::debug("Pushing %s to the focus stack", Application::currentFocus->describe().c_str());
+        Logger::debug("Pushing {} to the focus stack", Application::currentFocus->describe());
         Application::focusStack.push_back(Application::currentFocus);
     }
 
@@ -832,6 +841,19 @@ void Application::onWindowSizeChanged()
         view->invalidate();
 
         view->onWindowSizeChanged();
+    }
+
+    if (Application::background)
+    {
+        Application::background->setBoundaries(
+            0,
+            0,
+            Application::contentWidth,
+            Application::contentHeight
+        );
+
+        Application::background->invalidate();
+        Application::background->onWindowSizeChanged();
     }
 
     Application::resizeNotificationManager();
@@ -932,7 +954,7 @@ FramerateCounter::FramerateCounter()
     this->setColor(nvgRGB(255, 255, 255));
     this->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->setHorizontalAlign(NVG_ALIGN_RIGHT);
-    this->setBackground(Background::BACKDROP);
+    this->setBackground(ViewBackground::BACKDROP);
 
     this->lastSecond = cpu_features_get_time_usec() / 1000;
 }
@@ -968,7 +990,7 @@ void Application::setMaximumFPS(unsigned fps)
         Application::frameTime = 1000 / (float)fps;
     }
 
-    Logger::info("Maximum FPS set to %d - using a frame time of %.2f ms", fps, Application::frameTime);
+    Logger::info("Maximum FPS set to {} - using a frame time of {:.2f} ms", fps, Application::frameTime);
 }
 
 std::string Application::getTitle()
@@ -989,6 +1011,26 @@ VoidEvent* Application::getGlobalHintsUpdateEvent()
 FontStash* Application::getFontStash()
 {
     return &Application::fontStash;
+}
+
+void Application::setBackground(Background* background)
+{
+    if (Application::background)
+    {
+        Application::background->willDisappear();
+        delete Application::background;
+    }
+
+    Application::background = background;
+
+    background->setBoundaries(0, 0, Application::contentWidth, Application::contentHeight);
+    background->invalidate(true);
+    background->willAppear(true);
+}
+
+ThemeVariant Application::getCurrentThemeVariant()
+{
+    return Application::currentThemeVariant;
 }
 
 } // namespace brls

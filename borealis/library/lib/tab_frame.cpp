@@ -23,6 +23,7 @@
 #include <borealis/rectangle.hpp>
 #include <borealis/sidebar.hpp>
 #include <borealis/tab_frame.hpp>
+#include <borealis/layer_view.hpp>
 
 namespace brls
 {
@@ -37,13 +38,17 @@ TabFrame::TabFrame()
     this->layout = new BoxLayout(BoxLayoutOrientation::HORIZONTAL);
     layout->addView(sidebar);
 
+    rightPane = new LayerView();
+
+    layout->addView(rightPane, true, false);
+
     this->setContentView(layout);
 }
 
 bool TabFrame::onCancel()
 {
     // Go back to sidebar if not already focused
-    if (!this->sidebar->isChildFocused())
+    if (!this->sidebar->isFocused())
     {
         Application::onGamepadButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_LEFT, false);
         return true;
@@ -52,10 +57,13 @@ bool TabFrame::onCancel()
     return AppletFrame::onCancel();
 }
 
-void TabFrame::switchToView(View* view)
+void TabFrame::switchToView(u_int64_t viewIndex)
 {
-    if (this->rightPane == view)
+    
+    if(this->rightPane->getLayerIndex() == viewIndex)
         return;
+
+    this->rightPane->changeLayer(viewIndex);
 
     if (this->layout->getViewsCount() > 1)
     {
@@ -63,25 +71,29 @@ void TabFrame::switchToView(View* view)
             this->rightPane->willDisappear(true);
         this->layout->removeView(1, false);
     }
-
-    this->rightPane = view;
+    
     if (this->rightPane != nullptr)
         this->layout->addView(this->rightPane, true, true); // addView() calls willAppear()
 }
 
 void TabFrame::addTab(std::string label, View* view)
 {
-    SidebarItem* item = this->sidebar->addItem(label, view);
+    //Add to map
+    u_int64_t viewID = reinterpret_cast<u_int64_t>(view);
+    panelMap[viewID] = rightPane->getLayerCount();
+    rightPane->addLayer(view);
+
+    SidebarItem* item = this->sidebar->addItem(label, viewID);
     item->getFocusEvent()->subscribe([this](View* view) {
         if (SidebarItem* item = dynamic_cast<SidebarItem*>(view))
-            this->switchToView(item->getAssociatedView());
+            this->switchToView(panelMap[item->getAssociatedViewId()]);
     });
 
     // Switch to first one as soon as we add it
     if (!this->rightPane)
     {
         Logger::debug("Switching to the first tab");
-        this->switchToView(view);
+        this->switchToView(0);
     }
 }
 
@@ -107,7 +119,7 @@ View* TabFrame::getDefaultFocus()
 
 TabFrame::~TabFrame()
 {
-    switchToView(nullptr);
+    switchToView(-1);
 
     // Content view is freed by ~AppletFrame()
 }
